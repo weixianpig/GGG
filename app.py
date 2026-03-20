@@ -1,5 +1,8 @@
-import os
 import sys
+from PySide6.QtWidgets import (
+    QApplication, QWidget, QVBoxLayout,
+    QPushButton, QFileDialog, QLabel, QMessageBox
+)
 from openpyxl import load_workbook
 
 # ====== 你的核心逻辑 ======
@@ -18,45 +21,23 @@ ROW_MAP = {
     "First Cost Sales": 20,
 }
 
-
-def resource_path(relative_path):
-    if hasattr(sys, "_MEIPASS"):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
-
-
-TEMPLATE_FILE = resource_path("Jeffan - Top 10 - 1.8.26. KB v1.xlsx")
+TEMPLATE_FILE = "fwtop10reportleslieneighbor/Jeffan - Top 10 - 1.8.26. KB v1.xlsx"
 
 
 def safe_float(v):
     try:
         return float(v)
-    except Exception:
+    except:
         return float("-inf")
-
-
-def extract_date_range(ws):
-    for row in ws.iter_rows():
-        for cell in row:
-            val = cell.value
-            if isinstance(val, str) and "Date Range" in val:
-                return val.strip()
-    return "Date Range"
 
 
 def load_data(raw_file):
     wb = load_workbook(raw_file, data_only=True)
-
-    if "Partner Central" in wb.sheetnames:
-        ws = wb["Partner Central"]
-    else:
-        ws = wb[wb.sheetnames[0]]
-
-    date_range_text = extract_date_range(ws)
+    ws = wb["Partner Central"]
 
     cols = []
     for c in range(4, ws.max_column + 1):
-        if ws.cell(10, c).value not in (None, ""):
+        if ws.cell(10, c).value:
             cols.append(c)
 
     items = []
@@ -74,29 +55,17 @@ def load_data(raw_file):
             "First Cost Sales": ws.cell(21, c).value,
         })
 
-    items.sort(key=lambda x: safe_float(x.get("First Cost Sales")), reverse=True)
-    return items[:10], date_range_text
+    items.sort(key=lambda x: safe_float(x["First Cost Sales"]), reverse=True)
+    return items[:10]
 
 
 def generate_report(raw_file, output_file):
-    items, date_range_text = load_data(raw_file)
+    items = load_data(raw_file)
 
     wb = load_workbook(TEMPLATE_FILE)
     ws = wb.active
 
-    # 顶部标题
-    ws["A1"] = "Top 10 SKUs"
-    ws["A2"] = date_range_text
-
-    # 先清空旧数据
-    for col in SLOT_COLS:
-        for row in range(11, 21):
-            ws.cell(row=row, column=col).value = None
-
-    # 填入新数据
     for i, item in enumerate(items):
-        if i >= len(SLOT_COLS):
-            break
         col = SLOT_COLS[i]
         for key, row in ROW_MAP.items():
             ws.cell(row=row, column=col).value = item.get(key)
@@ -108,7 +77,7 @@ def generate_report(raw_file, output_file):
 class App(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("GG")
+        self.setWindowTitle("gg")
         self.setGeometry(100, 100, 400, 200)
 
         layout = QVBoxLayout()
