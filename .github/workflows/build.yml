@@ -1,0 +1,24 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install pyside6 openpyxl pyinstaller
+
+      - run: pyinstaller --windowed --noconfirm --name "GG" --add-data "Jeffan - Top 10 - 1.8.26. KB v1.xlsx;." app.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GG
+          path: dist/**
